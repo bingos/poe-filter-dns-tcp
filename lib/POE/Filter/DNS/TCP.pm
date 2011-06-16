@@ -59,7 +59,9 @@ sub _decoder {
   my $buf = substr $$data, 0, Net::DNS::INT16SZ();
   return unless length $buf;
   my ($len) = unpack 'n', $buf;
-  return $len if $len;
+  return unless $len;
+  substr $$data, 0, Net::DNS::INT16SZ(), '';
+  return $len;
 }
 
 sub get_pending {
@@ -82,14 +84,60 @@ sub put {
 
 q[You know like, in'it];
 
+=begin Pod::Coverage
+
+ FRAMING_BUFFER
+ EXPECTED_SIZE
+
+=end Pod::Coverage
+
 =pod
 
 =head1 SYNOPSIS
 
+  use POE::Filter::DNS::TCP;
+
+  my $filter = POE::Filter::DNS::TCP->new();
+  my $arrayref_of_net_dns_objects = $filter->get( [ $dns_stream ] );
+  my $arrayref_of_streamed_dns_pckts = $filter->put( $arrayref_of_net_dns_objects );
+
 =head1 DESCRIPTION
+
+POE::Filter::DNS::TCP is a L<POE::Filter> for parsing and generating DNS messages
+received from or transmitted (respectively) over TCP as per RFC 1035.
 
 =head1 CONSTRUCTOR
 
+=over
+
+=item C<new>
+
+Creates a new POE::Filter::DNS::TCP object.
+
+=back
+
 =head1 METHODS
+
+=over
+
+=item C<get>
+
+=item C<get_one_start>
+
+=item C<get_one>
+
+Takes an arrayref which is contains streams of raw TCP DNS packets.
+Returns an arrayref of L<Net::DNS::Packet> objects.
+
+=item C<put>
+
+Takes an arrayref of L<Net::DNS::Packet> objects.
+Returns an arrayref of raw TCP DNS packets.
+
+=item C<clone>
+
+Makes a copy of the filter, and clears the copy's buffer.
+
+=back
 
 =cut
