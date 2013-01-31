@@ -75,6 +75,7 @@ sub put {
   my @blocks;
   foreach my $packet (@$packets) {
     next unless eval { $packet->isa('Net::DNS::Packet'); };
+    $packet->{buffer} = '';
     my $packet_data = $packet->data;
     my $lenmsg = pack( 'n', length $packet_data );
     push @blocks, $lenmsg . $packet_data;
